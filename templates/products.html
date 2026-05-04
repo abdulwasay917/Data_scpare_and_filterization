@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+    background: #f5f6fa;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 280px;
+    background: white;
+    border-radius: 12px;
+    padding: 18px 16px 16px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 28px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Section labels */
+.sidebar label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* INPUT / SELECT */
+.sidebar input,
+.sidebar select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+.sidebar input:focus,
+.sidebar select:focus {
+    border-color: #00bfff;
+}
+
+/* Price Range */
+.sidebar label[for="min_price"],
+.sidebar label[for="max_price"] {
+    margin-top: 10px;
+}
+
+/* CATEGORY */
+.sidebar label[for="category_select"] {
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+/* SUBCATEGORY SECTION (IMPORTANT) */
+#subcategories-container {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 10px 0 0 0;
+    border-top: 1px solid #eee;
+}
+
+#subcategories-container p {
+    margin: 0 0 6px;
+    color: #333;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+#subcategories-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 13px;
+}
+
+#subcategories-container input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* SEARCH / SORT */
+.sidebar label[for="search"],
+.sidebar label[for="sort"] {
+    margin-top: 16px;
+}
+
+/* FILTER BUTTON */
+.sidebar button {
+    width: 100%;
+    padding: 10px 20px;
+    border: none;
+    background: #0077be;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 16px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.sidebar button:hover {
+    background: #005fa0;
+    transform: translateY(-1px);
+}
+
+/* PRODUCTS GRID */
+.products {
+    flex: 1;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+/* CARD */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-decoration: none;
+    color: #222;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    background: #fcfcfc;
+}
+
+/* IMAGE */
+.card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #f0f0f0;
+    margin-bottom: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover img {
+    transform: scale(1.02);
+}
+
+/* TITLE + PRICE */
+.card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 6px 0 4px;
+    line-height: 1.2;
+    color: #111;
+}
+
+.card p {
+    margin: 0;
+    font-size: 13px;
+    color: #e63946;
+    font-weight: 600;
+}
+
+/* CATEGORY TITLE */
+#category-title {
+    margin-bottom: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+}
+
+/* LOADING */
+#loading {
+    display: none;
+    padding: 10px;
+    font-weight: 500;
+    text-align: center;
+    color: #666;
+}
+
+/* PAGINATION */
+#pagination {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+#pagination button {
+    margin: 0;
+    padding: 7px 12px;
+    border: none;
+    background: #333;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+#pagination button:hover {
+    background: #555;
+}
+
+#pagination button.active {
+    background: #00aaff;
+}
+
+#pagination span {
+    margin: 0 4px;
+    color: #888;
+    font-size: 13px;
+}
+</style>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <!-- Price Range -->
+        <label for="min_price">Min / Max Price</label>
+        <input type="number" id="min_price" placeholder="Min Price">
+        <input type="number" id="max_price" placeholder="Max Price">
+
+        <!-- Category -->
+        <label for="category_select">Category</label>
+        <select id="category_select" onchange="updateSubcategories()">
+            <option value="">Select Category</option>
+            {% for cat in header_categories %}
+                <option value="{{ cat.id }}"
+                        {% if category and category.id == cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- Subcategories (aligned & tight under category) -->
+        <div id="subcategories-container"></div>
+
+        <!-- Search -->
+        <label for="search">Search</label>
+        <input type="text" id="search" placeholder="Search product">
+
+        <!-- Sort By -->
+        <label for="sort">Sort By</label>
+        <select id="sort">
+            <option value="">Sort By</option>
+            <option value="low">Price Low → High</option>
+            <option value="high">Price High → Low</option>
+        </select>
+
+        <!-- Filter Button -->
+        <button onclick="loadProducts(1)">Apply Filters</button>
+
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="products">
+
+        <h2 id="category-title">
+            {% if category %}{{ category.name }}{% else %}All Categories{% endif %}
+        </h2>
+
+        <div id="loading">Products loading...</div>
+
+        <div class="grid" id="product-container"></div>
+
+        <div id="pagination"></div>
+
+    </div>
+
+</div>
+
+<script>
+let path = window.location.pathname.split("/");
+let current_category = path[2] || "";
+
+const params = new URLSearchParams(window.location.search);
+const initial_search = params.get('search') || "";
+const initial_sort = params.get('sort') || "";
+const initial_subcats = params.get('subcategories') || "";
+
+document.getElementById("search").value = initial_search;
+document.getElementById("sort").value = initial_sort;
+
+function getPageFromURL(){
+    return parseInt(params.get("page")) || 1;
+}
+
+function updateURL(page, keep_search=true){
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+
+    if (keep_search) {
+        url.searchParams.set('search', document.getElementById("search").value);
+    }
+    url.searchParams.set('sort', document.getElementById("sort").value);
+
+    let subcat_inputs = document.querySelectorAll('input[name="subcat"]:checked');
+    let sub_ids = [];
+    subcat_inputs.forEach(inp => sub_ids.push(inp.value));
+    if (sub_ids.length > 0) {
+        url.searchParams.set('subcategories', sub_ids.join(","));
+    } else if (url.searchParams.has('subcategories')) {
+        url.searchParams.delete('subcategories');
+    }
+
+    window.history.pushState({}, '', url);
+}
+
+function updateSubcategories() {
+    const cat_id = document.getElementById("category_select").value;
+    const subContainer = document.getElementById("subcategories-container");
+
+    if (!cat_id) {
+        subContainer.innerHTML = "<p>Select a category to see subcategories</p>";
+        return;
+    }
+
+    fetch(`/api/subcategories/?category_id=${cat_id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.subcategories || data.subcategories.length === 0) {
+                subContainer.innerHTML = "<p>No subcategories found.</p>";
+                return;
+            }
+
+            let html = `<p>Subcategories</p>`;
+            data.subcategories.forEach(s => {
+                let checked = "";
+                if (initial_subcats) {
+                    const sub_ids = initial_subcats.split(",");
+                    checked = sub_ids.includes(s.id.toString()) ? "checked" : "";
+                }
+                html += `
+                  <label>
+                    <input type="checkbox"
+                           name="subcat"
+                           value="${s.id}"
+                           id="subcat_${s.id}"
+                           ${checked}>
+                    ${s.name}
+                  </label>`;
+            });
+
+            subContainer.innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            subContainer.innerHTML = "<p>Error loading subcategories.</p>";
+        });
+}
+
+function loadProducts(page=1, keep_search=true){
+    document.getElementById("loading").style.display = "block";
+
+    let min = document.getElementById("min_price").value || "";
+    let max = document.getElementById("max_price").value || "";
+    let search = document.getElementById("search").value || "";
+    let sort = document.getElementById("sort").value || "";
+    let category_id = document.getElementById("category_select").value || "";
+
+    let subcat_inputs = document.querySelectorAll('input[name="subcat"]:checked');
+    let subcategory_ids = [];
+    subcat_inputs.forEach(inp => subcategory_ids.push(inp.value));
+
+    fetch(`/filter-products/?page=${page}&min=${min}&max=${max}&search=${search}&category=${category_id}&subcategories=${subcategory_ids.join(",")}&sort=${sort}`)
+        .then(res => res.json())
+        .then(data => {
+            let products = data.products;
+
+            let container = document.getElementById("product-container");
+            container.innerHTML = "";
+
+            // NO PRODUCTS FOUND
+            if(!products || products.length === 0){
+                container.innerHTML = `
+                    <div style="grid-column:1 / -1; text-align:center; padding:24px 0;">
+                        <h3>No products found</h3>
+                    </div>`;
+
+                document.getElementById("pagination").style.display = "none";
+                document.getElementById("loading").style.display = "none";
+                return;
+            }
+
+            products.forEach(p => {
+                container.innerHTML += `
+                    <a href="/product/${p.id}/" class="card">
+                        <img src="${p.image}" loading="lazy" decoding="async">
+                        <h4>${p.product_name}</h4>
+                        <p>Rs ${p.price}</p>
+                    </a>
+                `;
+            });
+
+            // PAGINATION: only if >1 page AND products exist
+            let pag = document.getElementById("pagination");
+            pag.innerHTML = "";
+
+            let current = data.current_page;
+            let total = data.total_pages;
+
+            if (total > 1 && products.length > 0) {
+                pag.style.display = "flex";
+
+                function addPage(i){
+                    pag.innerHTML += `
+                        <button class="${i === current ? 'active' : ''}"
+                        onclick="goToPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                addPage(1);
+
+                if(current > 3){
+                    pag.innerHTML += `<span>...</span>`;
+                }
+
+                for(let i = current - 1; i <= current + 1; i++){
+                    if(i > 1 && i < total){
+                        addPage(i);
+                    }
+                }
+
+                if(current < total - 2){
+                    pag.innerHTML += `<span>...</span>`;
+                }
+
+                if(total > 1){
+                    addPage(total);
+                }
+
+            } else {
+                pag.style.display = "none";
+            }
+
+            document.getElementById("loading").style.display = "none";
+        });
+}
+
+function goToPage(page, keep_search=true){
+    updateURL(page, keep_search);
+    loadProducts(page, keep_search);
+}
+
+// INIT
+window.addEventListener("DOMContentLoaded", () => {
+    if (current_category) {
+        document.getElementById("category_select").value = current_category;
+    }
+    updateSubcategories();
+    loadProducts(getPageFromURL());
+});
+</script>
+
+{% endblock %}

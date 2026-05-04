@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+    background: #f5f6fa;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.title {
+    text-align: center;
+    margin: 30px 0 14px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #111;
+}
+
+/* SEARCH BAR */
+.search-box {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.search-box input {
+    width: 300px;
+    padding: 10px 14px;
+    border-radius: 24px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #fff;
+    color: #333;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.search-box input:focus {
+    border-color: #00bfff;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    padding: 16px 20px;
+}
+
+/* CARD */
+.card {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* IMAGE */
+.card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f0f0f0;
+    transition: transform 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.card:hover img {
+    transform: scale(1.05);
+}
+
+/* CATEGORY NAME */
+.card h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+    text-align: center;
+}
+
+/* NO IMAGE PLACEHOLDER */
+.card .placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    color: #888;
+    font-size: 12px;
+}
+</style>
+
+<h2 class="title">All Categories</h2>
+
+<!-- SEARCH -->
+<div class="search-box">
+    <input type="text" id="searchCat" placeholder="Search category..." onkeyup="filterCategories()">
+</div>
+
+<!-- GRID -->
+<div class="grid" id="categoryGrid">
+
+    {% for item in cat_data %}
+        <a href="/products/{{ item.category.id }}/" class="card">
+            {% if item.product %}
+                <img src="{{ item.product.image }}" alt="{{ item.product.product_name }}" loading="lazy">
+            {% else %}
+                <div class="placeholder">No product image</div>
+            {% endif %}
+            <h3>{{ item.category.name }}</h3>
+        </a>
+    {% endfor %}
+
+</div>
+
+<script>
+function filterCategories(){
+    let input = document.getElementById("searchCat").value.toLowerCase();
+    let cards = document.querySelectorAll(".card");
+
+    cards.forEach(card => {
+        let text = card.innerText.toLowerCase();
+
+        if(text.includes(input)){
+            card.style.display = "grid";  /* modern: preserve grid layout */
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,222 @@
+<header>
+  <style>
+    .navbar {
+      background: #1a1a1a;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      font-family: Inter, "Segoe UI", sans-serif;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: #e0e0e0;
+      text-decoration: none;
+      margin: 0 14px;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+
+    .navbar a:hover {
+      color: #00d4ff;
+    }
+
+    /* BRAND / LOGO */
+    .brand {
+      font-size: 18px;
+      font-weight: 600;
+      color: #00d4ff;
+    }
+
+    /* SEARCH BAR */
+    .search input {
+      padding: 9px 12px;
+      width: 280px;
+      border-radius: 24px;
+      border: none;
+      outline: none;
+      background: #2e2e2e;
+      color: white;
+      font-size: 13px;
+    }
+
+    .search input::placeholder {
+      color: #999;
+    }
+
+    /* CATEGORIES MAIN DROPDOWN */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropbtn {
+      background: none;
+      color: #e0e0e0;
+      border: none;
+      font-size: 14px;
+      padding: 0 8px;
+      cursor: pointer;
+      margin-right: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dropbtn:hover,
+    .dropbtn:focus {
+      background: rgba(0, 0, 0, 0.2);
+      color: #00d4ff;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #111;
+      min-width: 250px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      padding: 8px 0;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* CATEGORY ITEM */
+    .category-item {
+      position: relative;
+    }
+
+    .category-item a {
+      display: block;
+      padding: 7px 14px 7px 12px;
+      color: #e0e0e0;
+      text-decoration: none;
+      font-size: 13px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .category-item a:hover {
+      background: #005fa0;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .category-item span:after {
+      content: " ▸";
+      float: right;
+      margin-left: 4px;
+      color: #888;
+    }
+
+    /* SUBCATEGORY NESTED DROPDOWN */
+    .sub-dropdown {
+      display: none;
+      position: absolute;
+      top: 0px;
+      left: 100%;
+      background: #181818;
+      min-width: 180px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      padding: 6px 0;
+    }
+
+    .category-item:hover .sub-dropdown {
+      display: block;
+    }
+
+    .sub-dropdown a {
+      display: block;
+      padding: 5px 12px;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .sub-dropdown a:hover {
+      background: #007acc;
+      color: white;
+      border-radius: 4px;
+    }
+
+    /* MOBILE STYLING */
+    @media (max-width: 768px) {
+      .dropdown-content {
+        min-width: 220px;
+        font-size: 13px;
+      }
+      .search input {
+        width: 200px;
+        font-size: 12px;
+      }
+      .navbar {
+        padding: 12px 14px;
+      }
+    }
+  </style>
+
+  <div class="navbar">
+
+    <!-- LEFT: Brand + Categories dropdown -->
+    <div class="nav-left">
+      <a href="/" class="brand">Habitt Store</a>
+
+      <div class="dropdown">
+        <button class="dropbtn">Categories ▾</button>
+        <div class="dropdown-content">
+
+          {% for cat in header_categories %}
+            <div class="category-item">
+              <!-- CATEGORY -->
+              <a href="/products/{{ cat.id }}/">
+                {{ cat.name }}
+                {% if cat.subcategories.all %}<span></span>{% endif %}
+              </a>
+
+              <!-- NESTED SUBCATEGORIES DROPDOWN -->
+              {% if cat.subcategories.all %}
+                <div class="sub-dropdown">
+                  {% for subcat in cat.subcategories.all %}
+                    <a href="/products/{{ cat.id }}/?subcategories={{ subcat.id }}">
+                      {{ subcat.name }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+            </div>
+          {% endfor %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH: PRODUCTS PAGE + SEARCH -->
+    <div class="search">
+      <form action="/products/" method="get">
+        <input type="text"
+               name="search"
+               placeholder="Search products..."
+               value="{{ request.GET.search|default:'' }}"
+               style="width:280px;border-radius:24px;border:none;padding:9px 12px;">
+      </form>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+      <a href="/products/">All Products</a>
+    </div>
+
+  </div>
+</header>
