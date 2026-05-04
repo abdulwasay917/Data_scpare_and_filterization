@@ -88,10 +88,6 @@ class Command(BaseCommand):
         soup = self.get_soup(session, url)
         products = soup.select(".product, .grid-product, .product-item")
 
-        print(f"\n--- SUB: {sub_obj.name}")
-        print("URL:", url)
-        print("TOTAL ITEMS:", len(products))
-
         saved = 0
 
         for p in products:
