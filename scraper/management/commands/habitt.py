@@ -35,7 +35,6 @@ class Command(BaseCommand):
             cat_name = a.get_text(strip=True)
             cat_url = a.get("href")
 
-            # ❌ skip unwanted
             if not cat_name or not cat_url:
                 continue
             if cat_name.lower() in ["sale", "home"]:
@@ -48,7 +47,7 @@ class Command(BaseCommand):
             sub_list = []
             seen = set()
 
-            # 🔥 IMPORTANT: only inside this category
+
             sub_items = cat.select("li.menu-lv-2 > a, .site-nav-title")
 
             for sub in sub_items:

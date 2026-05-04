@@ -70,8 +70,10 @@ def filter_products(request):
     if subcategories:
         sub_ids = subcategories.split(",")
         sub_ids = [s.strip() for s in sub_ids if s]
+        # print(sub_ids)
         if sub_ids:
             products = products.filter(subcategory_id__in=sub_ids)
+
 
     min_price = request.GET.get('min')
     max_price = request.GET.get('max')
@@ -93,7 +95,7 @@ def filter_products(request):
         products = products.order_by('-price')
 
 
-    paginator = Paginator(products, 6)
+    paginator = Paginator(products, 9)
     page_obj = paginator.get_page(page)
 
     data = []
