@@ -5,9 +5,10 @@ from .ai_utils import classify_product
 
 @receiver(post_save, sender=Product)
 def auto_classify_product(sender, instance, created, **kwargs):
-    if created:  # sirf new product pe run hoga
-        result = classify_product(instance.name)
+    if created:
+        result = classify_product(instance.product_name)
 
-        instance.category = result["category"]
-        instance.subcategory = result["subcategory"]
-        instance.save()
+        Product.objects.filter(id=instance.id).update(
+            category=result["category"],
+            subcategory=result["subcategory"]
+        )
