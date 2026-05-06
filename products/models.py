@@ -27,8 +27,8 @@ class Product(models.Model):
 
     image = models.URLField(blank=True, null=True)
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.product_name
