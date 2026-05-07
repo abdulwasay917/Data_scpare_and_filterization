@@ -38,49 +38,46 @@ def product(request, category_id=None):
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    similar_products = []
 
-    # SIMILAR PRODUCTS - PERFECT FIXED!
-    similar_products_list = []
+    # STEP 1: Embedding similarity (same category) - PRIMARY
     try:
-        from .embedding import model  # ✅ Fixed filename
+        from .embeddings import model
 
-        product_embedding = model.encode(product.product_name)
-        candidates = Product.objects.exclude(id=product_id).filter(
+        same_cat_candidates = Product.objects.filter(
+            category=product.category
+        ).exclude(id=product_id).filter(
             image__isnull=False
-        )[:30]  # More candidates
+        )[:15]
 
-        scores = []
-        for candidate_product in candidates:
-            if candidate_product.product_name:
-                candidate_embedding = model.encode(candidate_product.product_name)
-                similarity = np.dot(product_embedding, candidate_embedding) / (
-                        np.linalg.norm(product_embedding) * np.linalg.norm(candidate_embedding)
+        if same_cat_candidates.exists():
+            product_vec = model.encode(product.product_name)
+            scores = []
+            for p in same_cat_candidates:
+                p_vec = model.encode(p.product_name)
+                sim = np.dot(product_vec, p_vec) / (
+                    np.linalg.norm(product_vec) * np.linalg.norm(p_vec)
                 )
-                if similarity > 0.35:  # ✅ Threshold
-                    scores.append((candidate_product, similarity))
+                scores.append((p, sim))
 
-        # Top 3 best matches
-        scores.sort(key=lambda x: x[1], reverse=True)
-        similar_products_list = [p for p, score in scores[:3]]
-
-        # Fallback same category
-        if len(similar_products_list) < 3:
-            remaining = Product.objects.filter(
-                category=product.category
-            ).exclude(id=product_id).exclude(
-                id__in=[p.id for p in similar_products_list]
-            ).filter(image__isnull=False)[:3 - len(similar_products_list)]
-            similar_products_list.extend(remaining)
+            scores.sort(key=lambda x: x[1], reverse=True)
+            similar_products = [p for p, _ in scores[:3]]
 
     except Exception as e:
-        print(f"Similarity error: {e}")
-        similar_products_list = Product.objects.filter(
+        print(f"Embedding error: {e}")
+
+    # STEP 2: Fallback - Random same category
+    if len(similar_products) < 3:
+        fallback = Product.objects.filter(
             category=product.category
-        ).exclude(id=product_id).filter(image__isnull=False)[:3]
+        ).exclude(id=product_id).exclude(
+            id__in=[p.id for p in similar_products]
+        ).filter(image__isnull=False).order_by('?')[:3-len(similar_products)]
+        similar_products.extend(fallback)
 
     return render(request, "product_details.html", {
         "product": product,
-        "similar_products": similar_products_list  # ✅ Used
+        "similar_products": similar_products[:3]
     })
 
 
