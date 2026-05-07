@@ -6,9 +6,6 @@ from .models import Category, SubCategory
 
 def classify_product(product_name):
 
-    # -------------------------
-    # GET EXISTING DATABASE DATA
-    # -------------------------
 
     categories = list(
         Category.objects.values_list("name", flat=True)
@@ -18,9 +15,6 @@ def classify_product(product_name):
         SubCategory.objects.values_list("name", flat=True)
     )
 
-    # -------------------------
-    # AI REQUEST
-    # -------------------------
 
     response = ollama.chat(
         model="llama3",
@@ -65,9 +59,6 @@ Output example:
         }]
     )
 
-    # -------------------------
-    # JSON SAFE LOAD
-    # -------------------------
     print(response["message"]["content"])
     try:
         data = json.loads(response["message"]["content"])
@@ -78,52 +69,39 @@ Output example:
             "subcategory": "General"
         }
 
-    # -------------------------
-    # CLEAN VALUES
-    # -------------------------
 
     category_name = data["category"].strip()
     subcategory_name = data["subcategory"].strip()
 
-    # -------------------------
-    # CATEGORY MATCHING
-    # -------------------------
 
     category_obj = Category.objects.filter(
         name__iexact=category_name
     ).first()
 
-    # partial match
     if not category_obj:
         category_obj = Category.objects.filter(
             name__icontains=category_name
         ).first()
 
-    # create new
     if not category_obj:
         category_obj = Category.objects.create(
             name=category_name
         )
 
-    # -------------------------
-    # SUBCATEGORY MATCHING
-    # -------------------------
 
     subcategory_obj = SubCategory.objects.filter(
         name__iexact=subcategory_name,
         category=category_obj
     ).first()
 
-    # create new
+
     if not subcategory_obj:
         subcategory_obj = SubCategory.objects.create(
             name=subcategory_name,
             category=category_obj
         )
 
-    # -------------------------
-    # RETURN OBJECTS
-    # -------------------------
+
 
     return {
         "category": category_obj,

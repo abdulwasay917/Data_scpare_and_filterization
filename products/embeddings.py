@@ -1,13 +1,11 @@
-# embeddings.py TOP mein add karo
 import os
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Fix parallel warning
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from .models import Category
 
-# Global model with error handling
 try:
     model = SentenceTransformer('all-MiniLM-L6-v2')
     print("✅ Embedding model loaded successfully!")
@@ -34,7 +32,6 @@ def find_best_category(product_name):
             best_score = similarity
             best_cat = cat
 
-    # FIXED: 0.60 → 0.30 (realistic threshold)
     if best_score >= 0.30:
         return best_cat
     return None

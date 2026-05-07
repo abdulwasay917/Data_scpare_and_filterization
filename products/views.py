@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-import numpy as np  # ✅ Added
+import numpy as np
 from .models import Category, Product, SubCategory
 
 
@@ -40,7 +40,6 @@ def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     similar_products = []
 
-    # STEP 1: Embedding similarity (same category) - PRIMARY
     try:
         from .embeddings import model
 
@@ -66,7 +65,6 @@ def product_detail(request, product_id):
     except Exception as e:
         print(f"Embedding error: {e}")
 
-    # STEP 2: Fallback - Random same category
     if len(similar_products) < 3:
         fallback = Product.objects.filter(
             category=product.category

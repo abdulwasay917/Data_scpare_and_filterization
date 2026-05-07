@@ -1,7 +1,6 @@
 from django.db import models
 
 
-# ---------------- CATEGORY ---------------- #
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
@@ -9,7 +8,6 @@ class Category(models.Model):
         return self.name
 
 
-# ---------------- SUBCATEGORY ---------------- #
 class SubCategory(models.Model):
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategories")
@@ -18,7 +16,6 @@ class SubCategory(models.Model):
         return f"{self.category.name} → {self.name}"
 
 
-# ---------------- PRODUCT ---------------- #
 class Product(models.Model):
     product_name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
