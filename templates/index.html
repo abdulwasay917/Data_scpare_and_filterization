@@ -17,7 +17,7 @@ body {
     color: #111;
 }
 
-/* SEARCH BAR */
+
 .search-box {
     display: flex;
     justify-content: center;
@@ -39,7 +39,7 @@ body {
     border-color: #00bfff;
 }
 
-/* GRID */
+
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -47,7 +47,7 @@ body {
     padding: 16px 20px;
 }
 
-/* CARD */
+
 .card {
     background: white;
     padding: 16px;
@@ -65,7 +65,7 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* IMAGE */
+
 .card img {
     width: 100%;
     height: 120px;
@@ -80,7 +80,7 @@ body {
     transform: scale(1.05);
 }
 
-/* CATEGORY NAME */
+
 .card h3 {
     margin: 0;
     font-size: 15px;
@@ -89,7 +89,7 @@ body {
     text-align: center;
 }
 
-/* NO IMAGE PLACEHOLDER */
+
 .card .placeholder {
     display: flex;
     justify-content: center;
@@ -135,7 +135,7 @@ function filterCategories(){
         let text = card.innerText.toLowerCase();
 
         if(text.includes(input)){
-            card.style.display = "grid";  /* modern: preserve grid layout */
+            card.style.display = "grid";
         } else {
             card.style.display = "none";
         }

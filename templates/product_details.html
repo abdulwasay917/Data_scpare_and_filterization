@@ -18,7 +18,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* LEFT: IMAGE SECTION */
 .image-section {
     flex: 1;
     min-width: 300px;
@@ -40,7 +39,6 @@ body {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-/* THUMBNAILS */
 .thumbnails {
     margin-top: 12px;
     display: flex;
@@ -63,7 +61,6 @@ body {
     border: 2px solid #0077be;
 }
 
-/* RIGHT: DETAILS SECTION */
 .details-section {
     flex: 1.5;
     min-width: 280px;
@@ -73,7 +70,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* HEADER */
 .product-title {
     font-size: 26px;
     font-weight: 600;
@@ -81,14 +77,12 @@ body {
     color: #111;
 }
 
-/* RATING */
 .rating {
     color: #f39c12;
     font-size: 16px;
     margin-bottom: 10px;
 }
 
-/* PRICE */
 .price {
     color: #e63946;
     font-size: 28px;
@@ -96,21 +90,18 @@ body {
     font-weight: 600;
 }
 
-/* AVAILABILITY */
 .in-stock {
     color: #28a745;
     font-weight: bold;
     margin-bottom: 16px;
 }
 
-/* CATEGORY / SUBCATEGORY */
 .category-info {
     color: #666;
     font-size: 14px;
     margin-bottom: 12px;
 }
 
-/* QUANTITY SELECTOR */
 .quantity {
     margin: 20px 0;
 }
@@ -140,7 +131,6 @@ body {
     font-weight: 600;
 }
 
-/* DESCRIPTION */
 .description {
     line-height: 1.6;
     margin: 14px 0 18px;
@@ -148,7 +138,6 @@ body {
     font-size: 14px;
 }
 
-/* BUTTONS */
 .buttons {
     margin-top: 20px;
 }
@@ -186,7 +175,6 @@ body {
     background: #d65719;
 }
 
-/* SIMILAR PRODUCTS SECTION */
 .similar-section {
     margin-top: 50px;
     padding-top: 30px;
@@ -243,7 +231,6 @@ body {
     margin: 0;
 }
 
-/* RESPONSIVE */
 @media (max-width: 992px) {
     .similar-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -278,35 +265,22 @@ body {
 </style>
 
 <div class="container">
-    <!-- LEFT: IMAGE SECTION -->
     <div class="image-section">
         <img id="mainImage" src="{{ product.image|default:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==' }}" alt="{{ product.product_name }}">
 
-        <!-- Thumbnails (optional) -->
-        <!--
-        <div class="thumbnails">
-            <img class="thumbnail active" src="{{ product.image }}" onclick="changeImage(this)">
-        </div>
-        -->
     </div>
 
-    <!-- RIGHT: DETAILS -->
     <div class="details-section">
-        <!-- PRODUCT TITLE -->
         <h1 class="product-title">{{ product.product_name }}</h1>
 
-        <!-- RATING -->
         <div class="rating">
             ★★★★☆ <span style="color:gray;font-size:14px;">(120 reviews)</span>
         </div>
 
-        <!-- PRICE -->
         <h2 id="price" class="price">Rs {{ product.price }}</h2>
 
-        <!-- AVAILABILITY -->
         <p class="in-stock">✔ In Stock</p>
 
-        <!-- CATEGORY / SUBCATEGORY -->
         <p class="category-info">
             <b>Category:</b> {{ product.category.name }}
         </p>
@@ -316,7 +290,6 @@ body {
         </p>
         {% endif %}
 
-        <!-- QUANTITY SELECTOR -->
         <div class="quantity">
             <label>Quantity:</label>
             <button class="quantity-btn" onclick="changeQty(-1)">−</button>
@@ -324,12 +297,10 @@ body {
             <button class="quantity-btn" onclick="changeQty(1)">+</button>
         </div>
 
-        <!-- DESCRIPTION -->
         {% if product.description %}
         <p class="description">{{ product.description }}</p>
         {% endif %}
 
-        <!-- BUTTONS -->
         <div class="buttons">
             <button class="btn btn-buy" onclick="buyNow()" style="width: 180px;">Buy Now</button>
             <button class="btn btn-cart" onclick="addToCart()" style="width: 180px;">Add to Cart</button>
@@ -337,7 +308,6 @@ body {
     </div>
 </div>
 
-<!-- 🎯 YOU MIGHT ALSO LIKE - NEW! -->
 <div class="similar-section" style="max-width: 1200px; margin: 0 auto 40px; padding: 0 16px;">
     <h3>You might also like</h3>
     <div class="similar-grid">
@@ -356,12 +326,10 @@ body {
     </div>
 </div>
 
-<!-- JS -->
 <script>
 let quantity = 1;
 let pricePerItem = {{ product.price }};
 
-// Quantity & Price update
 function changeQty(val) {
     quantity += val;
     if (quantity < 1) quantity = 1;
@@ -370,7 +338,6 @@ function changeQty(val) {
     document.getElementById("price").innerText = "Rs " + Math.round(total);
 }
 
-// Buttons
 function buyNow() {
     alert("Proceeding to checkout with " + quantity + " items!");
 }

@@ -24,14 +24,13 @@
       color: #00d4ff;
     }
 
-    /* BRAND / LOGO */
     .brand {
       font-size: 18px;
       font-weight: 600;
       color: #00d4ff;
     }
 
-    /* SEARCH BAR */
+
     .search input {
       padding: 9px 12px;
       width: 280px;
@@ -47,7 +46,7 @@
       color: #999;
     }
 
-    /* CATEGORIES MAIN DROPDOWN */
+
     .dropdown {
       position: relative;
       display: inline-block;
@@ -91,7 +90,7 @@
       display: block;
     }
 
-    /* CATEGORY ITEM */
+
     .category-item {
       position: relative;
     }
@@ -118,7 +117,7 @@
       color: #888;
     }
 
-    /* SUBCATEGORY NESTED DROPDOWN */
+
     .sub-dropdown {
       display: none;
       position: absolute;
@@ -150,7 +149,7 @@
       border-radius: 4px;
     }
 
-    /* MOBILE STYLING */
+
     @media (max-width: 768px) {
       .dropdown-content {
         min-width: 220px;
@@ -168,7 +167,7 @@
 
   <div class="navbar">
 
-    <!-- LEFT: Brand + Categories dropdown -->
+
     <div class="nav-left">
       <a href="/" class="brand">Habitt Store</a>
 
@@ -178,13 +177,13 @@
 
           {% for cat in header_categories %}
             <div class="category-item">
-              <!-- CATEGORY -->
+
               <a href="/products/{{ cat.id }}/">
                 {{ cat.name }}
                 {% if cat.subcategories.all %}<span></span>{% endif %}
               </a>
 
-              <!-- NESTED SUBCATEGORIES DROPDOWN -->
+
               {% if cat.subcategories.all %}
                 <div class="sub-dropdown">
                   {% for subcat in cat.subcategories.all %}
@@ -202,7 +201,7 @@
       </div>
     </div>
 
-    <!-- SEARCH: PRODUCTS PAGE + SEARCH -->
+
     <div class="search">
       <form action="/products/" method="get">
         <input type="text"
@@ -213,7 +212,7 @@
       </form>
     </div>
 
-    <!-- RIGHT -->
+
     <div class="nav-right">
       <a href="/products/">All Products</a>
     </div>
