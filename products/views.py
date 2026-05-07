@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-
+import numpy as np  # ✅ Added
 from .models import Category, Product, SubCategory
 
 
@@ -36,38 +36,51 @@ def product(request, category_id=None):
         })
 
 
-# product_detail ke end mein ye add karo
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
-    # SIMILAR PRODUCTS - NEW!
-    similar_products = []
+    # SIMILAR PRODUCTS - PERFECT FIXED!
+    similar_products_list = []
     try:
-        from .embedding import find_best_category, model  # SentenceTransformer
+        from .embedding import model  # ✅ Fixed filename
 
-        product_vec = model.encode(product.product_name)
-        all_products = Product.objects.exclude(id=product_id)[:20]  # Top 20 candidates
+        product_embedding = model.encode(product.product_name)
+        candidates = Product.objects.exclude(id=product_id).filter(
+            image__isnull=False
+        )[:30]  # More candidates
 
-        product_scores = []
-        for p in all_products:
-            if p.product_name and p.image:  # Valid products only
-                p_vec = model.encode(p.product_name)
-                similarity = np.dot(product_vec, p_vec) / (
-                        np.linalg.norm(product_vec) * np.linalg.norm(p_vec)
+        scores = []
+        for candidate_product in candidates:
+            if candidate_product.product_name:
+                candidate_embedding = model.encode(candidate_product.product_name)
+                similarity = np.dot(product_embedding, candidate_embedding) / (
+                        np.linalg.norm(product_embedding) * np.linalg.norm(candidate_embedding)
                 )
-                product_scores.append((p, similarity))
+                if similarity > 0.35:  # ✅ Threshold
+                    scores.append((candidate_product, similarity))
 
-        # Top 3 similar
-        product_scores.sort(key=lambda x: x[1], reverse=True)
-        similar_products = [p for p, score in product_scores[:3]]
+        # Top 3 best matches
+        scores.sort(key=lambda x: x[1], reverse=True)
+        similar_products_list = [p for p, score in scores[:3]]
+
+        # Fallback same category
+        if len(similar_products_list) < 3:
+            remaining = Product.objects.filter(
+                category=product.category
+            ).exclude(id=product_id).exclude(
+                id__in=[p.id for p in similar_products_list]
+            ).filter(image__isnull=False)[:3 - len(similar_products_list)]
+            similar_products_list.extend(remaining)
 
     except Exception as e:
         print(f"Similarity error: {e}")
-        similar_products = Product.objects.exclude(id=product_id).filter(image__isnull=False)[:3]
+        similar_products_list = Product.objects.filter(
+            category=product.category
+        ).exclude(id=product_id).filter(image__isnull=False)[:3]
 
     return render(request, "product_details.html", {
         "product": product,
-        "similar_products": similar_products  # NEW!
+        "similar_products": similar_products_list  # ✅ Used
     })
 
 
@@ -85,7 +98,6 @@ def api_subcategories(request):
 
 
 def filter_products(request):
-
     products = Product.objects.all()
 
     category_id = request.GET.get('category')
@@ -96,10 +108,8 @@ def filter_products(request):
     if subcategories:
         sub_ids = subcategories.split(",")
         sub_ids = [s.strip() for s in sub_ids if s]
-        # print(sub_ids)
         if sub_ids:
             products = products.filter(subcategory_id__in=sub_ids)
-
 
     min_price = request.GET.get('min')
     max_price = request.GET.get('max')
@@ -119,7 +129,6 @@ def filter_products(request):
         products = products.order_by('price')
     elif sort == "high":
         products = products.order_by('-price')
-
 
     paginator = Paginator(products, 9)
     page_obj = paginator.get_page(page)
