@@ -40,7 +40,7 @@ body {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-/* THUMBNAILS (optional - add later) */
+/* THUMBNAILS */
 .thumbnails {
     margin-top: 12px;
     display: flex;
@@ -58,8 +58,9 @@ body {
     transition: opacity 0.2s;
 }
 
-.thumbnail:hover {
+.thumbnail:hover, .thumbnail.active {
     opacity: 1;
+    border: 2px solid #0077be;
 }
 
 /* RIGHT: DETAILS SECTION */
@@ -185,7 +186,71 @@ body {
     background: #d65719;
 }
 
-/* Tablet / Mobile */
+/* SIMILAR PRODUCTS SECTION */
+.similar-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.similar-section h3 {
+    margin-bottom: 20px;
+    color: #222;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.similar-card {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    text-decoration: none;
+    color: #222;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    max-width: 240px;
+}
+
+.similar-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.similar-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.similar-card h4 {
+    font-size: 13px;
+    margin: 4px 0;
+    line-height: 1.3;
+}
+
+.similar-card p {
+    color: #e63946;
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .similar-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -197,30 +262,36 @@ body {
     .price {
         font-size: 22px;
     }
+    .similar-grid {
+        grid-template-columns: 1fr;
+    }
     .btn {
         padding: 10px 20px;
         font-size: 13px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .btn-cart {
+        margin-left: 0;
     }
 }
 </style>
 
 <div class="container">
-
     <!-- LEFT: IMAGE SECTION -->
     <div class="image-section">
-        <img id="mainImage" src="{{ product.image }}" alt="{{ product.product_name }}">
+        <img id="mainImage" src="{{ product.image|default:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==' }}" alt="{{ product.product_name }}">
 
         <!-- Thumbnails (optional) -->
         <!--
         <div class="thumbnails">
-            <img class="thumbnail" src="{{ product.image }}" onclick="changeImage(this)">
+            <img class="thumbnail active" src="{{ product.image }}" onclick="changeImage(this)">
         </div>
         -->
     </div>
 
     <!-- RIGHT: DETAILS -->
     <div class="details-section">
-
         <!-- PRODUCT TITLE -->
         <h1 class="product-title">{{ product.product_name }}</h1>
 
@@ -239,7 +310,6 @@ body {
         <p class="category-info">
             <b>Category:</b> {{ product.category.name }}
         </p>
-
         {% if product.subcategory %}
         <p class="category-info">
             <b>Subcategory:</b> {{ product.subcategory.name }}
@@ -255,47 +325,58 @@ body {
         </div>
 
         <!-- DESCRIPTION -->
+        {% if product.description %}
         <p class="description">{{ product.description }}</p>
+        {% endif %}
 
+        <!-- BUTTONS -->
+        <div class="buttons">
+            <button class="btn btn-buy" onclick="buyNow()" style="width: 180px;">Buy Now</button>
+            <button class="btn btn-cart" onclick="addToCart()" style="width: 180px;">Add to Cart</button>
+        </div>
     </div>
-
 </div>
 
-<!-- JS PART -->
+<!-- 🎯 YOU MIGHT ALSO LIKE - NEW! -->
+<div class="similar-section" style="max-width: 1200px; margin: 0 auto 40px; padding: 0 16px;">
+    <h3>You might also like</h3>
+    <div class="similar-grid">
+        {% for similar in similar_products %}
+        <a href="/product/{{ similar.id }}/" class="similar-card">
+            <img src="{{ similar.image|default:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==' }}"
+                 alt="{{ similar.product_name }}" loading="lazy">
+            <h4>{{ similar.product_name }}</h4>
+            <p>Rs {{ similar.price }}</p>
+        </a>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+            No similar products found
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- JS -->
 <script>
 let quantity = 1;
 let pricePerItem = {{ product.price }};
 
-// Image change (optional, if you add thumbnails)
-function changeImage(img) {
-    document.getElementById("mainImage").src = img.src;
-}
-
-// Zoom effect on hover
-document.getElementById("mainImage").addEventListener("mouseover", function () {
-    this.style.transform = "scale(1.2)";
-});
-document.getElementById("mainImage").addEventListener("mouseout", function () {
-    this.style.transform = "scale(1)";
-});
-
-// Quantity change
+// Quantity & Price update
 function changeQty(val) {
     quantity += val;
     if (quantity < 1) quantity = 1;
     document.getElementById("qty").innerText = quantity;
-
     let total = quantity * pricePerItem;
-    document.getElementById("price").innerText = "Rs " + total;
+    document.getElementById("price").innerText = "Rs " + Math.round(total);
 }
 
 // Buttons
 function buyNow() {
-    alert("Proceeding to checkout...");
+    alert("Proceeding to checkout with " + quantity + " items!");
 }
 
 function addToCart() {
-    alert("Added to cart (" + quantity + " items)");
+    alert("Added " + quantity + "x " + "{{ product.product_name }}" + " to cart!");
 }
 </script>
 

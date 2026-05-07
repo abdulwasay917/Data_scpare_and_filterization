@@ -36,12 +36,38 @@ def product(request, category_id=None):
         })
 
 
-
+# product_detail ke end mein ye add karo
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
+    # SIMILAR PRODUCTS - NEW!
+    similar_products = []
+    try:
+        from .embedding import find_best_category, model  # SentenceTransformer
+
+        product_vec = model.encode(product.product_name)
+        all_products = Product.objects.exclude(id=product_id)[:20]  # Top 20 candidates
+
+        product_scores = []
+        for p in all_products:
+            if p.product_name and p.image:  # Valid products only
+                p_vec = model.encode(p.product_name)
+                similarity = np.dot(product_vec, p_vec) / (
+                        np.linalg.norm(product_vec) * np.linalg.norm(p_vec)
+                )
+                product_scores.append((p, similarity))
+
+        # Top 3 similar
+        product_scores.sort(key=lambda x: x[1], reverse=True)
+        similar_products = [p for p, score in product_scores[:3]]
+
+    except Exception as e:
+        print(f"Similarity error: {e}")
+        similar_products = Product.objects.exclude(id=product_id).filter(image__isnull=False)[:3]
+
     return render(request, "product_details.html", {
-        "product": product
+        "product": product,
+        "similar_products": similar_products  # NEW!
     })
 
 
