@@ -20,7 +20,7 @@ class Command(BaseCommand):
         nums = re.findall(r"\d+\.?\d*", text.replace(",", ""))
         return float(nums[0]) if nums else 0
 
-    # ✅ CATEGORY + SUBCATEGORY (STRICT FROM MENU)
+
     def get_menu_data(self, soup, base_url):
         data = []
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 sub_name = sub.get_text(strip=True)
                 sub_url = sub.get("href")
 
-                # ❌ strict filters
+
                 if not sub_name or not sub_url:
                     continue
                 if "go to" in sub_name.lower():
@@ -82,7 +82,6 @@ class Command(BaseCommand):
 
         return data
 
-    # ✅ PRODUCT SCRAPER
     def scrape_products(self, session, url, category_obj, sub_obj):
 
         soup = self.get_soup(session, url)
@@ -108,7 +107,6 @@ class Command(BaseCommand):
 
                 product_url = urljoin(url, link.get("href"))
 
-                # -------- PRICE -------- #
                 price = 0
                 json_data = p.get("data-json-product")
 
@@ -127,7 +125,6 @@ class Command(BaseCommand):
                     except:
                         price = 0
 
-                # -------- DESCRIPTION -------- #
                 description = ""
                 try:
                     detail = self.get_soup(session, product_url)
@@ -138,7 +135,6 @@ class Command(BaseCommand):
                 except:
                     pass
 
-                # -------- SAVE -------- #
                 if not Product.objects.filter(product_name=name).exists():
 
                     Product.objects.create(
@@ -159,7 +155,6 @@ class Command(BaseCommand):
 
         return saved
 
-    # ✅ MAIN
     def handle(self, *args, **kwargs):
 
         base_url = "https://habitt.com/"
@@ -177,7 +172,6 @@ class Command(BaseCommand):
 
             cat_obj, _ = Category.objects.get_or_create(name=cat["name"])
 
-            # 🔥 if subcategories exist
             if cat["subs"]:
                 for sub in cat["subs"]:
 
@@ -194,7 +188,6 @@ class Command(BaseCommand):
                     )
 
             else:
-                # fallback (rare)
                 sub_obj, _ = SubCategory.objects.get_or_create(
                     name=cat["name"],
                     category=cat_obj
