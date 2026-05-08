@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 import numpy as np
-from .models import Category, Product
+from .models import Category, Product, SubCategory
 
 
 def index(request):
