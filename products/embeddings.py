@@ -1,35 +1,28 @@
-import os
-
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-from sentence_transformers import SentenceTransformer
 import numpy as np
-from .models import Category
+from sentence_transformers import SentenceTransformer
 
-try:
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-except Exception as e:
-    model = None
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
-def find_best_category(product_name):
-    if model is None:
-        return None
+def get_embedding(text):
+    return model.encode(text)
 
-    product_vec = model.encode(product_name)
-    best_cat = None
-    best_score = 0
 
-    for cat in Category.objects.all():
-        cat_vec = model.encode(cat.name)
-        similarity = np.dot(product_vec, cat_vec) / (
-            np.linalg.norm(product_vec) * np.linalg.norm(cat_vec)
-        )
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-        if similarity > best_score:
-            best_score = similarity
-            best_cat = cat
 
-    if best_score >= 0.30:
-        return best_cat
-    return None
+def get_similar_products(base_product, candidates, top_k):
+
+
+    base_vec = get_embedding(base_product.product_name)
+
+    scores = []
+    for p in candidates:
+        p_vec = get_embedding(p.product_name)
+        sim = cosine_similarity(base_vec, p_vec)
+        scores.append((p, sim))
+
+    scores.sort(key=lambda x: x[1], reverse=True)
+
+    return [p for p, _ in scores[:top_k]]

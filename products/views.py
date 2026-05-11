@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-import numpy as np
 from .models import Category, Product, SubCategory
+from .embeddings import get_similar_products
 
 
 def index(request):
@@ -38,40 +38,25 @@ def product(request, category_id=None):
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+
     similar_products = []
 
     try:
-        from .embeddings import model
-
-        same_cat_candidates = Product.objects.filter(
+        candidates = Product.objects.filter(
             category=product.category
         ).exclude(id=product_id).filter(
             image__isnull=False
-        )[:15]
+        )
 
-        if same_cat_candidates.exists():
-            product_vec = model.encode(product.product_name)
-            scores = []
-            for p in same_cat_candidates:
-                p_vec = model.encode(p.product_name)
-                sim = np.dot(product_vec, p_vec) / (
-                    np.linalg.norm(product_vec) * np.linalg.norm(p_vec)
-                )
-                scores.append((p, sim))
-
-            scores.sort(key=lambda x: x[1], reverse=True)
-            similar_products = [p for p, _ in scores[:3]]
+        if candidates.exists():
+            similar_products = get_similar_products(
+                base_product=product,
+                candidates=candidates,
+                top_k=3
+            )
 
     except Exception as e:
         print(f"Embedding error: {e}")
-
-    if len(similar_products) < 3:
-        fallback = Product.objects.filter(
-            category=product.category
-        ).exclude(id=product_id).exclude(
-            id__in=[p.id for p in similar_products]
-        ).filter(image__isnull=False).order_by('?')[:3-len(similar_products)]
-        similar_products.extend(fallback)
 
     return render(request, "product_details.html", {
         "product": product,
