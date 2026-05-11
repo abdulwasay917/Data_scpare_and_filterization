@@ -59,13 +59,12 @@ Output example:
         }]
     )
 
-    print(response["message"]["content"])
     try:
         data = json.loads(response["message"]["content"])
 
     except:
         data = {
-            "category": "Miscellaneous",
+            "category": "Unknown",
             "subcategory": "General"
         }
 

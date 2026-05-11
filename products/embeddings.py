@@ -8,9 +8,7 @@ from .models import Category
 
 try:
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    print("✅ Embedding model loaded successfully!")
 except Exception as e:
-    print(f"❌ Model load error: {e}")
     model = None
 
 
